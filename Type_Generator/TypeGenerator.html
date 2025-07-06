@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <title>TypeGenerator</title>
+   <meta charset="UTF-8">
+   <link rel="stylesheet" href="typeGenerator.css">
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+</head>
+<body> 
+  <section id="preview">
+   <div id="container">
+      <div id="text">gdb</div>
+   </div>
+  </section>
+   
+  <section id="canvas">
+
+  </section>
+
+  <section id="tools">
+   <div id="text-input">
+      <span>Your text</span>
+      <textarea type="text">I'm 
+afraid</textarea>
+   </div>
+
+   <div id="font-size" class="control slider">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 30"><path d="m14.88,12.13h-1.55l-5.39,11.8h1.89l1.34-2.99h5.86l1.34,2.99h1.91l-5.39-11.8Zm1.45,7.25h-4.46l2.23-4.99,2.23,4.99Z"/><path d="m39.89,23.93h2.18l-8.96-19.6h-2.04l-8.96,19.6h2.16l2.34-5.24h10.94l2.34,5.24Zm-12.53-6.92l4.72-10.54,4.72,10.54h-9.43Z"/></svg>
+      <input type="range" min="12" max="100" value="50">
+   </div>
+
+   <div id="radius" class="control slider">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 30"><path d="m14.88,12.13h-1.55l-5.39,11.8h1.89l1.34-2.99h5.86l1.34,2.99h1.91l-5.39-11.8Zm1.45,7.25h-4.46l2.23-4.99,2.23,4.99Z"/><path d="m39.89,23.93h2.18l-8.96-19.6h-2.04l-8.96,19.6h2.16l2.34-5.24h10.94l2.34,5.24Zm-12.53-6.92l4.72-10.54,4.72,10.54h-9.43Z"/></svg>
+      <input type="range" min="0" max="100" value="5">
+   </div>
+  </section>
+
+<!-- <script src="TypeGenerator.js"></script> -->
+<script src="typeSketch.js"></script>
+</body>
+</html>

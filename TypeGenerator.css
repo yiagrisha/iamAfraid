@@ -1,0 +1,344 @@
+html {
+  scroll-behavior: smooth;
+
+  --mobile-viewport-min: 320;
+  --mobile-desktop-breakpoint: 768;
+  --desktop-viewport-max: 1500;
+
+  --mobile-font-size-min: 14;
+  --mobile-font-size-max: 24;
+  
+  --desktop-font-size-min: 24;
+  --desktop-font-size-max: 36;
+
+  font-size: calc(var(--mobile-font-size-min) * 1px);
+
+  @media screen and (min-width: 320px) {    
+    font-size: calc(var(--mobile-font-size-min) * 1px + (var(--mobile-font-size-max) - var(--mobile-font-size-min)) * ((100vw - var(--mobile-viewport-min) * 1px) / (var(--mobile-desktop-breakpoint) - var(--mobile-viewport-min))));
+  }
+
+  @media screen and (min-width: 768px) {    
+    font-size: calc(var(--desktop-font-size-min) * 1px + (var(--desktop-font-size-max) - var(--desktop-font-size-min)) * ((100vw - var(--mobile-desktop-breakpoint) * 1px) / (var(--desktop-viewport-max) - var(--mobile-desktop-breakpoint))));
+  }
+
+  @media screen and (min-width: 1500px) {    
+    font-size: calc(var(--desktop-font-size-max) * 1px);
+  }
+}
+
+@font-face {
+   font-family: 'Montserrat';
+   src: url(Materials/Montserrat-Regular.ttf);
+}
+@font-face {
+   font-family: 'Amarante';
+   src: url(Materials/Amarante/Amarante-Regular.ttf);
+}
+@font-face {
+   font-family: 'Press_Start_2P';
+   src: url(Materials/Press_Start_2P/PressStart2P-Regular.ttf);
+}
+@font-face {
+   font-family: 'NotoSansJP';
+   src: url(Materials/NotoSansJP-VariableFont_wght.ttf);
+}
+@font-face {
+   font-family: 'Faculty_Glyphic';
+   src: url(Materials/Faculty_Glyphic/FacultyGlyphic-Regular.ttf);
+}
+
+* {
+   box-sizing: border-box;
+}
+
+body {
+   margin: 0;
+}
+
+#preview {
+   width: 100%;
+   height: 50vh;
+   background-color: bisque;
+
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   
+
+   #container {
+      width: 80%;
+      border-bottom: 1px solid rgb(0, 0, 0);
+      max-height: 100%;
+
+      #text{
+         display: inline-block;
+         white-space: pre;
+      }
+   }
+}
+
+#canvas {
+   width: 100%;
+   height: 50vh;
+}
+
+#tools {
+   position: absolute;
+   top: 0;
+   left: 0;
+   z-index: 10;
+
+   background-color: aliceblue;
+   width: 5em;
+   
+}
+
+#text-input {
+   display: flex;
+   flex-direction: column;
+   
+   font-size: 0.7em;
+   width: 100%;
+   
+   span {
+      font-size: 0.7em;
+      padding: 0 0 0.2em 1.1em;
+   }
+   
+   textarea {
+      border: black solid 1px;
+      border-radius: 0.2em;
+      white-space: pre;
+      
+      width: 100%;
+      max-width: 100%;
+      min-width: 10em;
+      min-height: 5em;
+      
+      font-family: inherit;
+      font-size: 1em;
+      box-sizing: border-box;
+      
+      padding: 0.5em 0.7em;
+   } 
+}
+
+.slider {
+   display: flex;
+   font-size: 0.7em;
+   width: 100%;
+
+   align-items: center;
+   gap: 0.05em;
+   justify-content: space-between;
+   
+   svg {
+      width: 3em;
+   }
+   
+   .value {
+      align-content: center;
+      text-align: end;
+      width: 3em;
+   }
+   
+   /* https://www.smashingmagazine.com/2021/12/create-custom-range-input-consistent-browsers/ */
+   
+   /********** Range Input Styles **********/
+   /*Range Reset*/
+   input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      cursor: pointer;
+      width: 100%;
+   }
+   
+   /* Removes default focus */
+   input[type="range"]:focus {
+      outline: none;
+   }
+   
+   /***** Chrome, Safari, Opera and Edge Chromium styles *****/
+   /* slider track */
+   input[type="range"]::-webkit-slider-runnable-track {
+      background-color: black;
+      border-radius: 1px;
+      height: 1px;  
+   }
+   
+   /* slider thumb */
+   input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; /* Override default look */
+      appearance: none;
+      
+      /*custom styles*/
+      background-color: black;
+      border: 2px solid white;
+      height: 1.2em;
+      width: 1.2em;
+      border-radius: 50%;
+      
+      transform: translateY(-43%)
+   }
+
+   @media screen and (max-width: 768px) {
+    width: 100%;
+    
+   }
+}
+
+
+.select {
+  width: fit-content;
+  cursor: pointer;
+  position: relative;
+  transition: 300ms;
+  color: white;
+  overflow: hidden;
+}
+
+.selected {
+  background-color: #2a2f3b;
+  padding: 5px;
+  margin-bottom: 3px;
+  border-radius: 5px;
+  position: relative;
+  z-index: 100000;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.arrow {
+  position: relative;
+  right: 0px;
+  height: 10px;
+  transform: rotate(-90deg);
+  width: 25px;
+  fill: white;
+  z-index: 100000;
+  transition: 300ms;
+}
+
+.options {
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;
+  padding: 5px;
+  background-color: #2a2f3b;
+  position: relative;
+  top: -100px;
+  opacity: 0;
+  transition: 300ms;
+}
+
+.select:hover > .options {
+  opacity: 1;
+  top: 0;
+}
+
+.select:hover > .selected .arrow {
+  transform: rotate(0deg);
+}
+
+.option {
+  border-radius: 5px;
+  padding: 5px;
+  transition: 300ms;
+  background-color: #2a2f3b;
+  width: 150px;
+  font-size: 15px;
+}
+.option:hover {
+  background-color: #323741;
+}
+
+.options input[type="radio"] {
+  display: none;
+}
+
+.options label {
+  display: inline-block;
+}
+.options label::before {
+  content: attr(data-txt);
+}
+
+.options input[type="radio"]:checked + label {
+  display: none;
+}
+
+.options input[type="radio"]#all:checked + label {
+  display: none;
+}
+
+.select:has(.options input[type="radio"]#all:checked) .selected::before {
+  content: attr(data-default);
+}
+.select:has(.options input[type="radio"]#option-1:checked) .selected::before {
+  content: attr(data-one);
+}
+.select:has(.options input[type="radio"]#option-2:checked) .selected::before {
+  content: attr(data-two);
+}
+.select:has(.options input[type="radio"]#option-3:checked) .selected::before {
+  content: attr(data-three);
+}
+.select:has(.options input[type="radio"]#option-4:checked) .selected::before {
+  content: attr(data-four);
+}
+.select:has(.options input[type="radio"]#option-5:checked) .selected::before {
+  content: attr(data-five);
+}
+
+
+#text-align {
+   display: flex;
+   flex-direction: column;
+   
+   font-size: 0.7em;
+   width: 100%;
+   
+   span {
+      font-size: 0.7em;
+      padding: 0 0 0.2em 1.1em;
+   }
+   
+   .radios {
+      display: flex; 
+      height: 4em;
+      gap: 5%;
+      
+      border: black solid 1px;
+      border-radius: 0.2em;
+      
+      
+      .radio {
+         width: 30%;
+         display: flex;
+         flex: 1 1 auto;
+         align-items: center;
+         justify-content: center;
+         
+         cursor: pointer;
+         
+         svg {
+            width: 100%;
+            
+            fill: rgba(51, 65, 85, 1);
+            transition: all .15s ease;
+         }
+         
+         input {
+            display: none;
+            
+            &:checked + svg {
+               fill: aquamarine;
+               width: 5em;
+            }
+         }
+      }
+   }
+}

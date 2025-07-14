@@ -1,64 +1,75 @@
-let typeGeneratorSketch = function(p) {
    let canvas
+   let starterText = "I'm\nafraid"
 
+   let fonts = []
    let font
-   let Montserrat = []
-   let Amarante = []
-   let Press_Start_2P = []
-   let NotoSansJP = []
-   let Faculty_Glyphic = []
-   const fontTypes = document.querySelectorAll('.select .options input')
+   let fontsBytes = []
+   let openTypeFonts = []
+   let OpenTypeFont
+
+   let fontTypes = document.querySelectorAll('.select .options input')
    let selectedType
    
-   let text = document.querySelector('#preview #text')
+   let colorSet = ["f94144","f3722c","f8961e","f9844a","f9c74f","90be6d","43aa8b","4d908e","577590","277da1"]
+   let cols = []
+   
+   let textElement = document.querySelector('#preview #text')
    let textContainer = document.querySelector('#preview #container')
    let screen = document.querySelector('#preview')
    let userInput = document.querySelector('#text-input textarea')
    let msgContent = userInput.value
    let containerWidth = document.querySelector('#font-size input')
 
-   let sidePadding
-   let topBottomPadding
    let currentFontSize
 
-   let lines = []
-   let totalTextHeight 
-   let lineHeight 
-
-   let points = []
-   let radiusInput = document.querySelector('#radius input')
-   let radius = radiusInput.value
    let angle = 0
 
-   const alignTabs = document.querySelectorAll('#text-align .radios .radio')
-   const alignOptions = ['left', 'center', 'right', 'justify']
-   let selectedAlign = 'left'
+   let alignTabs = document.querySelectorAll('#text-align .radios .radio input')
+   let alignOptions = ['left', 'center', 'right', 'justify']
+   let selectedAlign 
 
-   p.preload = function() {
-      Montserrat = p.loadFont('Materials/Montserrat-Regular.ttf')
-      Amarante = p.loadFont('Materials/Amarante/Amarante-regular.ttf')
-      Press_Start_2P = p.loadFont('Materials/Press_Start_2P/PressStart2P-Regular.ttf')
-      NotoSansJP = p.loadFont('Materials/NotoSansJP-VariableFont_wght.ttf')
-      Faculty_Glyphic = p.loadFont('Materials/Faculty_Glyphic/FacultyGlyphic-Regular.ttf')
-      font = Montserrat
+   let FPC
+
+   function preload() {
+      const fontPaths = [
+         'Materials/Montserrat-Regular.ttf',
+         'Materials/Amarante/Amarante-regular.ttf',
+         'Materials/Press_Start_2P/PressStart2P-Regular.ttf',
+         'Materials/NotoSansJP-VariableFont_wght.ttf',
+         'Materials/Faculty_Glyphic/FacultyGlyphic-Regular.ttf'
+      ]
+      for(let i = 0; i < fontPaths.length; i++) {
+         fonts[i] = loadFont(fontPaths[i])
+         fontsBytes[i] = loadBytes(fontPaths[i])
+      }
    }
 
-   p.setup = function() {
+   function setup() {
       let container = document.querySelector('#canvas')
-      canvas = p.createCanvas(container.offsetWidth, container.offsetHeight)
+      canvas = createCanvas(container.offsetWidth, container.offsetHeight, WEBGL)
       canvas.parent(container)
-      p.angleMode(p.DEGREES)
 
+      angleMode(DEGREES)
+      
+      userInput.value = starterText
+
+      for(let i = 0; i < fontsBytes.length; i++) {
+         openTypeFonts[i] = opentype.parse(fontsBytes[i].bytes.buffer)
+      }
+      font = fonts[0]
+      OpenTypeFont = openTypeFonts[0]
+      
       for (let i = 0; i < fontTypes.length; i++) {
          fontTypes[i].addEventListener('change', function(event) {
             if(event.target.checked) {
-               selectedType = i
-               font = [Montserrat, Amarante, Press_Start_2P, NotoSansJP, Faculty_Glyphic][i]
+               font = fonts[i]
+               OpenTypeFont = openTypeFonts[i]
+
                fontName = ['Montserrat', 'Amarante', 'Press_Start_2P', 'NotoSansJP', 'Faculty_Glyphic'][i]
-               text.style.fontFamily = fontName
-   
-               updateContainerWidth()
+               textElement.style.fontFamily = fontName
             }
+            updateContainerWidth()
+            updateFontSize()
          })
       }
 
@@ -66,7 +77,7 @@ let typeGeneratorSketch = function(p) {
          alignTabs[i].addEventListener('change', function(event) {
             if(event.target.checked) {
                selectedAlign = alignOptions[i]
-               text.style.textAlign = selectedAlign
+               textElement.style.textAlign = selectedAlign
             }
             updateContainerWidth()
          })
@@ -79,19 +90,19 @@ let typeGeneratorSketch = function(p) {
       updateContainerWidth()
       
       function updateFontSize() {
-         text.innerText = userInput.value
-         msgContent = userInput.value
+         textElement.innerText = userInput.value
+         msgContent = userInput.value.match(/[^\r\n]+/g)
 
-         if(text.offsetHeight > textContainer.offsetHeight) {
+         if(textElement.offsetHeight > textContainer.offsetHeight) {
             let b = 0
             let t = 400
          
             while(t-b > 0.05) {
                let m = (b+t)/2
-               text.style.fontSize = m + 'px'
+               textElement.style.fontSize = m + 'px'
                currentFontSize = m
             
-               if(text.offsetHeight <= textContainer.offsetHeight) {
+               if(textElement.offsetHeight <= textContainer.offsetHeight) {
                   b = m
                } else {
                   t = m
@@ -103,180 +114,254 @@ let typeGeneratorSketch = function(p) {
          
             while(r-l > 0.05) {
                let m = (l+r)/2
-               text.style.fontSize = m + 'px'
+               textElement.style.fontSize = m + 'px'
                currentFontSize = m
             
-               if(text.offsetWidth < textContainer.offsetWidth) {
+               if(textElement.offsetWidth < textContainer.offsetWidth) {
                   l = m
                } else {
                   r = m
                }
             }
          }
-
-         updatePadding()
-         updateTextLayout()
-      }
-      
-      function updatePadding() {
-         sidePadding = (screen.offsetWidth - textContainer.offsetWidth) / 2
-         topBottomPadding = screen.offsetHeight - ((screen.offsetHeight - textContainer.offsetHeight) / 2) - textContainer.offsetHeight / 12
-      }
-      
-      function updateTextLayout() {
-         msgContent = userInput.value
-         lines = msgContent.split('\n')
-         lineHeight = currentFontSize 
-         totalTextHeight = lines.length * lineHeight
-
-         generatePoints()
+         FPC = updateTextLayout()
       }
       
       userInput.addEventListener('input', updateFontSize)
       window.addEventListener('resize', updateFontSize)
       containerWidth.addEventListener('input', updateContainerWidth)
-      radiusInput.addEventListener('input', function() {radius = radiusInput.value})
 
-      function generatePoints() {
-         points = []
-         const startY = topBottomPadding - totalTextHeight + lineHeight
-         const baselineShift = currentFontSize * 0.25
+      function updateTextLayout() {  
+         let allComands = []
 
-         for (let i = 0; i < lines.length; i++) {
-            const lineY = startY + i * lineHeight - baselineShift
-            const chars = lines[i].split('')
+         let align = selectedAlign
 
-            p.textFont(font)
-            p.textSize(currentFontSize)
+         let lines = userInput.value.split('\n')
+         let lineHeight = currentFontSize 
+         let font = OpenTypeFont
 
-            // Получаем ширину всей строки
-            const lineWidth = p.textWidth(lines[i])
+         let containerOffsetWidth = 0
+         let containerOffsetHeight = lines.length * lineHeight
+         let baselineShift = lineHeight/5
 
-            // Вычисляем отступ от начала строки в зависимости от выравнивания
-            let xOffset = 0
-            if (selectedAlign === 'center') {
-               xOffset = (textContainer.offsetWidth - lineWidth) / 2
-            } else if (selectedAlign === 'right') {
-               xOffset = textContainer.offsetWidth - lineWidth
-            } 
+         for(let i = 0; i < lines.length; i++) {
+            let lineWidth = font.getAdvanceWidth(lines[i], currentFontSize)
+            if(containerOffsetWidth < lineWidth) {containerOffsetWidth = lineWidth}
+         }
+         
+         for(let i = 0; i < lines.length; i++) {
+            let lineWidth = font.getAdvanceWidth(lines[i], currentFontSize)
 
-            let charX = sidePadding + xOffset
+            let lineOffsetY = lineHeight * (i+1)
+            let lineOffsetX = 0
+            if(align === 'center') {
+               lineOffsetX = (containerOffsetWidth - lineWidth) / 2
+            } else if(align === 'right') {
+               lineOffsetX = containerOffsetWidth - lineWidth
+            }   
 
-            if (selectedAlign === 'justify' && lines[i].indexOf(' ') !== -1) {
-               let words = lines[i].split(' ')
+            let words = lines[i].split(' ')
+            let gaps = words.length - 1
+            let extraSpace = 0
+            if(align === 'justify') {
                let totalWordWidth = 0
                for (let j = 0; j < words.length; j++) {
-                  totalWordWidth += p.textWidth(words[j])
+                  totalWordWidth += font.getAdvanceWidth(words[j], currentFontSize)
                }
+               extraSpace = gaps > 0 ? (containerOffsetWidth - totalWordWidth) / gaps : 0
+            }
+            
+            let charOffsetX = 0
+            for(let j = 0; j < words.length; j++) {
+               let word = words[j].split('')
 
-               let gaps = words.length - 1
-               let extraSpace = gaps > 0 ? (textContainer.offsetWidth - totalWordWidth) / gaps : 0
-               let wordX = sidePadding
+               for(let k = 0; k < word.length; k++) {
+                  let charWidth = font.getAdvanceWidth(word[k], currentFontSize)
+                  let path = font.getPath(word[k], 0, 0, currentFontSize)
 
-               for (let j = 0; j < words.length; j++) {
-                  let word = words[j]
-                  for (let k = 0; k < word.length; k++) {
-                     let char = word[k]
-                     let charWidth = p.textWidth(char)
-                     let charPoints = font.textToPoints(char, wordX, lineY, currentFontSize, {
-                        sampleFactor: 1,
-                        simplifyThreshold: 0
-                     })
-                     points.push({ char: char, points: charPoints, x: wordX, y: lineY })
-                     wordX += charWidth
-                  }
-                  wordX += extraSpace
-               }
-
-            } else {
-               for (let c = 0; c < chars.length; c++) {
-                  let char = chars[c]
-                  p.textFont(font)
-                  p.textSize(currentFontSize)
-                  const charWidth = p.textWidth(char)
-                  const charPoints = font.textToPoints(char, charX, lineY, currentFontSize, {
-                     sampleFactor: 1,
-                     simplifyThreshold: 0.4
+                  let overallOffsetX = -(containerOffsetWidth/2) + lineOffsetX + charOffsetX
+                  let overallOffsetY = -(containerOffsetHeight/2) + lineOffsetY - baselineShift
+                  
+                  const shifted = path.commands.map(cmd => {
+                     const c = {...cmd}
+                     if (c.x !== undefined)  c.x  += overallOffsetX
+                     if (c.y !== undefined)  c.y  += overallOffsetY
+                     if (c.x1 !== undefined) c.x1 += overallOffsetX
+                     if (c.y1 !== undefined) c.y1 += overallOffsetY
+                     if (c.x2 !== undefined) c.x2 += overallOffsetX
+                     if (c.y2 !== undefined) c.y2 += overallOffsetY
+                     return c
                   })
-                  points.push({ char, points: charPoints, x: charX, y: lineY })
-                  charX += charWidth
+                  allComands.push(...shifted)
+
+                  charOffsetX += charWidth
+               }
+
+               if(j < words.length - 1) {
+                  charOffsetX += extraSpace + font.getAdvanceWidth(' ', currentFontSize)
+               }
+            }
+         }
+         return allComands
+      }
+      FPC = updateTextLayout() 
+   }
+   
+   function quadLerp(a, b, c, t) {
+      return (1 - t)**2 * a + 2 * (1 - t) * t * b + t**2 * c;
+   }
+   function generateColors() {
+      for (let i = 0; i < FPC.length; i++) {
+         cols[i] = round(random(colorSet.length - 1))
+      }
+   }
+
+   let period = 180
+   let maxExtrusion = 100
+   function easeInOutQuint (t, b, c, d) {
+    if ((t /= d / 2) < 1) return c / 2 * t * t * t * t * t + b;
+    return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
+   }
+
+   function draw() {
+      background(255,224,135)
+      
+      let t = angle % period     // t от 0 до 1
+      let progress = (t / period) * 2
+      if (progress > 1) progress = 2 - progress // Reversing phase
+
+      let extru = easeInOutQuint(progress, 0, maxExtrusion, 1)  
+      
+
+      if (progress === 0) {
+         generateColors()
+      }
+     
+
+      
+
+      let res = 5
+      let closePoint = 0;
+
+
+      for (let i = 0; i < FPC.length; i++) {
+         fill(`#${colorSet[cols[i]]}`)
+
+         if (FPC[i].type == "M") {
+         }
+
+         if (FPC[i].type == "Z") {
+         beginShape(TRIANGLE_STRIP);
+            vertex(FPC[i - 1].x, FPC[i - 1].y, -extru);
+            vertex(FPC[i - 1].x, FPC[i - 1].y, extru);
+
+            vertex(FPC[closePoint].x, FPC[closePoint].y, -extru);
+            vertex(FPC[closePoint].x, FPC[closePoint].y, extru);
+         endShape();
+
+         closePoint = i + 1;
+         }
+
+         if (FPC[i].type == "L") {
+         beginShape(TRIANGLE_STRIP);
+            vertex(FPC[i - 1].x, FPC[i - 1].y, -extru);
+            vertex(FPC[i - 1].x, FPC[i - 1].y, extru);
+
+            vertex(FPC[i].x, FPC[i].y, -extru);
+            vertex(FPC[i].x, FPC[i].y, extru);
+         endShape();
+         }
+         
+         if (FPC[i].type == "Q") {
+         beginShape(TRIANGLE_STRIP);
+            for(let r = 0; r < res; r++){
+               let thisT = r/(res - 1);
+               let thisX = quadLerp(FPC[i - 1].x, FPC[i].x1, FPC[i].x, thisT);
+               let thisY = quadLerp(FPC[i - 1].y, FPC[i].y1, FPC[i].y, thisT);
+
+               vertex(thisX, thisY, -extru);
+               vertex(thisX, thisY, extru);
+            }
+         endShape();
+         }
+
+         if (FPC[i].type == "C") {
+         beginShape(TRIANGLE_STRIP);
+            for(let r = 0; r < res; r++){
+               let thisT = r/(res - 1);
+               let thisX = bezierPoint(FPC[i - 1].x, FPC[i].x1, FPC[i].x2, FPC[i].x, thisT);
+               let thisY = bezierPoint(FPC[i - 1].y, FPC[i].y1, FPC[i].y2, FPC[i].y, thisT);
+
+               vertex(thisX, thisY, -extru);
+               vertex(thisX, thisY, extru);
+            }
+         endShape();
+         } 
+      }
+
+
+      for (let m = 0; m < 2; m++) {
+         translate(0, 0, m * extru)
+         noStroke(0)
+
+         if (m == 0) continue
+
+         for (let j = 0; j < 2; j++) {
+            let openContour = false
+            /* if(j == 1){
+               strokeWeight(2);
+               noStroke(0);
+               //noFill();
+               //translate(0, 0, -50);
+            } else {
+               noStroke();
+               fill(255,110,10)
+            } */
+            noStroke();
+            fill(255,110,10)
+
+            closePoint = 0
+            for (i = 0; i < FPC.length; i++) {
+               if (FPC[i].type == "M") {
+                  if(i > 0){
+                     beginContour();
+                     openContour = true;
+                  } else {
+                     beginShape(TESS);
+                  }
+                  vertex(FPC[i].x, FPC[i].y);
+               }
+            
+               if (FPC[i].type == "Z") {
+                  if(openContour){
+                     endContour();
+                  }
+                  if(i == FPC.length - 1){
+                     endShape(CLOSE);
+                  }
+                  closePoint = i + 1;
+               }
+            
+               if (FPC[i].type == "L") {
+                  vertex(FPC[i].x, FPC[i].y);
+               }
+      
+               if (FPC[i].type == "Q") {
+                  quadraticVertex(FPC[i].x1, FPC[i].y1, FPC[i].x, FPC[i].y);
+               }
+      
+               if (FPC[i].type == "C") {
+                  bezierVertex(FPC[i].x1, FPC[i].y1, FPC[i].x2, FPC[i].y2, FPC[i].x, FPC[i].y);
+                  vertex(FPC[i].x, FPC[i].y);
                }
             }
          }
       }
-      
-      
-
-   }
-   
-   p.draw = function() {
-      p.background(255,224,135)
-      
-      /* POINTS AND TYPE FOR EVERY SYMBOL APART */
-      for (let i = 0; i < points.length; i++) {
-         const data = points[i]
-         const char = data.char
-         const charPoints = data.points
-         const baseX = data.x
-         const baseY = data.y
-
-         // Центр буквы
-         let avgX = 0, avgY = 0
-         for (let pt of charPoints) {
-            avgX += pt.x
-            avgY += pt.y
-         }
-         avgX /= charPoints.length
-         avgY /= charPoints.length
-
-         const distToMouse = p.dist(p.mouseX, p.mouseY, avgX, avgY)
-         const localRadius = p.map(distToMouse, 0, 200, 15, 5, true)
-         const offsetX = localRadius * p.cos(angle) * parseFloat(radius)
-         const offsetY = localRadius * p.sin(angle) * parseFloat(radius)
-
-         for (let pt of charPoints) {
-            p.stroke(255, 150, 10)
-            p.line(pt.x, pt.y, pt.x + offsetX, pt.y + offsetY)
-         }
-
-      }
-
-      for (let i = 0; i < points.length; i++) {
-         const data = points[i]
-         const char = data.char
-         const charPoints = data.points
-         const baseX = data.x
-         const baseY = data.y
-
-         // Центр буквы
-         let avgX = 0, avgY = 0
-         for (let pt of charPoints) {
-            avgX += pt.x
-            avgY += pt.y
-         }
-         avgX /= charPoints.length
-         avgY /= charPoints.length
-
-         const distToMouse = p.dist(p.mouseX, p.mouseY, avgX, avgY)
-         const localRadius = p.map(distToMouse, 0, 200, 15, 5, true)
-         const offsetX = localRadius * p.cos(angle) * parseFloat(radius)
-         const offsetY = localRadius * p.sin(angle) * parseFloat(radius)
-         // Отрисовка символа
-         p.noStroke()
-         p.fill(255, 120, 10)
-         p.textAlign(p.LEFT, p.BASELINE)
-         p.textFont(font)
-         p.textSize(currentFontSize)
-         p.text(char, baseX + offsetX, baseY + offsetY)
-      }
       angle++
-      
+
    }
 
-   p.windowResized = function() {
+   function windowResized() {
       let container = document.querySelector('#canvas')
-      p.resizeCanvas(container.offsetWidth, container.offsetHeight)
+      resizeCanvas(container.offsetWidth, container.offsetHeight)
    }
-}
-
-new p5(typeGeneratorSketch)

@@ -53,17 +53,23 @@ html {
 
 body {
    margin: 0;
+   padding: 0;
+   height: 100vh;
+
+   overflow: hidden;
 }
 
 #preview {
+   position: absolute;
+   z-index: -100;
+
    width: 100%;
-   height: 50vh;
-   background-color: bisque;
+   height: 90vh;
+   background-color: rgb(255, 255, 255);
 
    display: flex;
    justify-content: center;
    align-items: center;
-   
 
    #container {
       width: 80%;
@@ -79,7 +85,7 @@ body {
 
 #canvas {
    width: 100%;
-   height: 50vh;
+   height: 100vh;
 }
 
 #tools {
@@ -88,17 +94,33 @@ body {
    left: 0;
    z-index: 10;
 
-   background-color: aliceblue;
-   width: 5em;
+   display: flex;
+   flex-direction: column;
+   gap: 0.8em;
+
+   background-color: rgb(0, 0, 0);
+   border-right: 1px solid white;
+   border-bottom: 1px solid white;
+   border-radius: 0 0 0.2em 0;
+   width: 200px;
    
+   padding: 0.3em;
+
+   aside {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2em;
+   }
 }
 
 #text-input {
    display: flex;
    flex-direction: column;
    
-   font-size: 0.7em;
+   font-size: 17px;
    width: 100%;
+
+   z-index: 200000;
    
    span {
       font-size: 0.7em;
@@ -106,13 +128,12 @@ body {
    }
    
    textarea {
-      border: black solid 1px;
+      border: none;
       border-radius: 0.2em;
       white-space: pre;
       
       width: 100%;
       max-width: 100%;
-      min-width: 10em;
       min-height: 5em;
       
       font-family: inherit;
@@ -134,6 +155,7 @@ body {
    
    svg {
       width: 3em;
+      fill: white;
    }
    
    .value {
@@ -162,7 +184,7 @@ body {
    /***** Chrome, Safari, Opera and Edge Chromium styles *****/
    /* slider track */
    input[type="range"]::-webkit-slider-runnable-track {
-      background-color: black;
+      background-color: rgb(255, 255, 255);
       border-radius: 1px;
       height: 1px;  
    }
@@ -173,8 +195,8 @@ body {
       appearance: none;
       
       /*custom styles*/
-      background-color: black;
-      border: 2px solid white;
+      background-color: white;
+      border: 2px solid black;
       height: 1.2em;
       width: 1.2em;
       border-radius: 50%;
@@ -190,53 +212,71 @@ body {
 
 
 .select {
-  width: fit-content;
+  width: 100%;
+  height: 1.2em;
+
   cursor: pointer;
   position: relative;
-  transition: 300ms;
-  color: white;
-  overflow: hidden;
+  transition: 0.3s;
+
+  color: rgb(0, 0, 0);
+  
+  .selected {
+    background-color: #ffffff;
+  
+    padding: 0.3em 0.2em 0.3em 0.5em;
+    margin-bottom: 0.1em;
+    border-radius: 0.2em;
+    
+    z-index: 100000;
+    font-size: 17px;
+  
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  
+    .arrow {
+      position: relative;
+      right: 0px;
+  
+      height: 1em;
+      width: 25px;
+  
+      fill: rgb(0, 0, 0);
+      z-index: 1000;
+  
+      transform: rotate(-90deg);
+      transition: 0.3s;
+    }
+   }
+  
+   .options {
+     display: flex;
+     flex-direction: column;
+   
+     border-radius: 0.2em;
+     padding: 0.3em 0.2em 0.3em 0.2em;
+   
+     background-color: #ffffff;
+     position: relative;
+   
+     opacity: 0;
+     transition: opacity 0 ease;
+   
+     top: -6em;
+     z-index: 100000;
+   }
+  
 }
 
-.selected {
-  background-color: #2a2f3b;
-  padding: 5px;
-  margin-bottom: 3px;
-  border-radius: 5px;
-  position: relative;
-  z-index: 100000;
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
 
-.arrow {
-  position: relative;
-  right: 0px;
-  height: 10px;
-  transform: rotate(-90deg);
-  width: 25px;
-  fill: white;
-  z-index: 100000;
-  transition: 300ms;
-}
 
-.options {
-  display: flex;
-  flex-direction: column;
-  border-radius: 5px;
-  padding: 5px;
-  background-color: #2a2f3b;
-  position: relative;
-  top: -100px;
-  opacity: 0;
-  transition: 300ms;
-}
 
 .select:hover > .options {
   opacity: 1;
   top: 0;
+  transition: opacity 0.5s ease;
 }
 
 .select:hover > .selected .arrow {
@@ -244,15 +284,17 @@ body {
 }
 
 .option {
-  border-radius: 5px;
-  padding: 5px;
-  transition: 300ms;
-  background-color: #2a2f3b;
-  width: 150px;
-  font-size: 15px;
+  border-radius: 0.2em;
+  padding: 0.2em 0 0.2em 0.3em;
+  transition: 0.3s;
+
+  background-color: #ffffff;
+
+  width: 100%;
+  font-size: 17px;
 }
 .option:hover {
-  background-color: #323741;
+  background-color: rgb(173, 173, 173);
 }
 
 .options input[type="radio"] {
@@ -294,7 +336,7 @@ body {
 }
 
 
-#text-align {
+.choosing {
    display: flex;
    flex-direction: column;
    
@@ -308,9 +350,6 @@ body {
    
    .radios {
       display: flex; 
-      height: 4em;
-      gap: 5%;
-      
       border: black solid 1px;
       border-radius: 0.2em;
       
@@ -327,7 +366,7 @@ body {
          svg {
             width: 100%;
             
-            fill: rgba(51, 65, 85, 1);
+            fill: rgb(173, 173, 173);
             transition: all .15s ease;
          }
          
@@ -335,8 +374,7 @@ body {
             display: none;
             
             &:checked + svg {
-               fill: aquamarine;
-               width: 5em;
+               fill: rgb(255, 255, 255);
             }
          }
       }

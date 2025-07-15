@@ -10,7 +10,8 @@
    let fontTypes = document.querySelectorAll('.select .options input')
    let selectedType
    
-   let colorSet = ["f94144","f3722c","f8961e","f9844a","f9c74f","90be6d","43aa8b","4d908e","577590","277da1"]
+   let colorSet2 = ["f94144","f3722c","f8961e","f9844a","f9c74f","90be6d","43aa8b","4d908e","577590","277da1"]
+   let colorSet = ["f94144", "90be6d", "43aa8b", "4d908e", "577590", "277da1"]
    let cols = []
    
    let textElement = document.querySelector('#preview #text')
@@ -28,7 +29,14 @@
    let alignOptions = ['left', 'center', 'right', 'justify']
    let selectedAlign 
 
+   let depthRegulator = document.querySelector('#depth input')
+
    let FPC
+   let FPCLetters = []
+
+   let animationTabs = document.querySelectorAll('#ZoomWaveTumblePunch .radios .radio input')
+   let animationOptions = ['Zoom', 'Wave', 'Tumble', 'Punch']
+   let selectedAnimation
 
    function preload() {
       const fontPaths = [
@@ -83,6 +91,15 @@
          })
       }
 
+      for (let i = 0; i < animationTabs.length; i++) {
+         animationTabs[i].addEventListener('change', function(event) {
+            if(event.target.checked) {
+               selectedAnimation = animationOptions[i]
+            }
+            updateContainerWidth()
+         })
+      }
+
       function updateContainerWidth() {
          textContainer.style.width = containerWidth.value + '%'
          updateFontSize()
@@ -108,6 +125,7 @@
                   t = m
                }
             } 
+            FPCLetters = updateTextLayout()
          } else {
             let l = 0
             let r = 400
@@ -123,16 +141,17 @@
                   r = m
                }
             }
+            FPCLetters = updateTextLayout()
          }
-         FPC = updateTextLayout()
       }
       
       userInput.addEventListener('input', updateFontSize)
       window.addEventListener('resize', updateFontSize)
       containerWidth.addEventListener('input', updateContainerWidth)
+      depthRegulator.addEventListener('input', function(event) {maxExtrusion = event.target.value})
 
       function updateTextLayout() {  
-         let allComands = []
+         let letters = []
 
          let align = selectedAlign
 
@@ -192,7 +211,14 @@
                      if (c.y2 !== undefined) c.y2 += overallOffsetY
                      return c
                   })
-                  allComands.push(...shifted)
+
+                  let xs = shifted.map(c => c.x ?? 0)
+                  let ys = shifted.map(c => c.y ?? 0)
+                  let center = {
+                     x: xs.reduce((a, b) => a + b, 0) / xs.length,
+                     y: ys.reduce((a, b) => a + b, 0) / ys.length
+                  }
+                  letters.push({ commands: shifted, center })
 
                   charOffsetX += charWidth
                }
@@ -202,19 +228,27 @@
                }
             }
          }
-         return allComands
+         return letters
       }
-      FPC = updateTextLayout() 
+      FPCLetters = updateTextLayout() 
+
+      generateColors()
    }
    
    function quadLerp(a, b, c, t) {
       return (1 - t)**2 * a + 2 * (1 - t) * t * b + t**2 * c;
    }
    function generateColors() {
-      for (let i = 0; i < FPC.length; i++) {
+      let totalCommands = 0;
+      for (let letter of FPCLetters) {
+         totalCommands += letter.commands.length;
+      }
+
+      for (let i = 0; i < totalCommands; i++) {
          cols[i] = round(random(colorSet.length - 1))
       }
    }
+   
 
    let period = 180
    let maxExtrusion = 100
@@ -223,61 +257,55 @@
     return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
    }
 
-   function draw() {
-      background(255,224,135)
-      
-      let t = angle % period     // t от 0 до 1
-      let progress = (t / period) * 2
-      if (progress > 1) progress = 2 - progress // Reversing phase
-
-      let extru = easeInOutQuint(progress, 0, maxExtrusion, 1)  
-      
-
-      if (progress === 0) {
-         generateColors()
-      }
-     
-
-      
-
+   function drawLetter(letter) {
       let res = 5
       let closePoint = 0;
 
+      let t = angle % period     // t от 0 до 1
+      let progress = (t / period) * 2
+      if (progress > 1) progress = 2 - progress // Reversing phase
+      let extru = easeInOutQuint(progress, 0, maxExtrusion, 1) 
+      if (progress === 0) {
+         generateColors()
+      } 
+      let cmd = letter.commands
 
-      for (let i = 0; i < FPC.length; i++) {
+      for (let i = 0; i < letter.commands.length; i++) {
+         
          fill(`#${colorSet[cols[i]]}`)
+         noStroke()
 
-         if (FPC[i].type == "M") {
+         if (cmd[i].type == "M") {
          }
 
-         if (FPC[i].type == "Z") {
+         if (cmd[i].type == "Z") {
          beginShape(TRIANGLE_STRIP);
-            vertex(FPC[i - 1].x, FPC[i - 1].y, -extru);
-            vertex(FPC[i - 1].x, FPC[i - 1].y, extru);
+            vertex(cmd[i - 1].x, cmd[i - 1].y, -extru);
+            vertex(cmd[i - 1].x, cmd[i - 1].y, extru);
 
-            vertex(FPC[closePoint].x, FPC[closePoint].y, -extru);
-            vertex(FPC[closePoint].x, FPC[closePoint].y, extru);
+            vertex(cmd[closePoint].x, cmd[closePoint].y, -extru);
+            vertex(cmd[closePoint].x, cmd[closePoint].y, extru);
          endShape();
 
          closePoint = i + 1;
          }
 
-         if (FPC[i].type == "L") {
+         if (cmd[i].type == "L") {
          beginShape(TRIANGLE_STRIP);
-            vertex(FPC[i - 1].x, FPC[i - 1].y, -extru);
-            vertex(FPC[i - 1].x, FPC[i - 1].y, extru);
+            vertex(cmd[i - 1].x, cmd[i - 1].y, -extru);
+            vertex(cmd[i - 1].x, cmd[i - 1].y, extru);
 
-            vertex(FPC[i].x, FPC[i].y, -extru);
-            vertex(FPC[i].x, FPC[i].y, extru);
+            vertex(cmd[i].x, cmd[i].y, -extru);
+            vertex(cmd[i].x, cmd[i].y, extru);
          endShape();
          }
          
-         if (FPC[i].type == "Q") {
+         if (cmd[i].type == "Q") {
          beginShape(TRIANGLE_STRIP);
             for(let r = 0; r < res; r++){
                let thisT = r/(res - 1);
-               let thisX = quadLerp(FPC[i - 1].x, FPC[i].x1, FPC[i].x, thisT);
-               let thisY = quadLerp(FPC[i - 1].y, FPC[i].y1, FPC[i].y, thisT);
+               let thisX = quadLerp(cmd[i - 1].x, cmd[i].x1, cmd[i].x, thisT);
+               let thisY = quadLerp(cmd[i - 1].y, cmd[i].y1, cmd[i].y, thisT);
 
                vertex(thisX, thisY, -extru);
                vertex(thisX, thisY, extru);
@@ -285,12 +313,12 @@
          endShape();
          }
 
-         if (FPC[i].type == "C") {
+         if (cmd[i].type == "C") {
          beginShape(TRIANGLE_STRIP);
             for(let r = 0; r < res; r++){
                let thisT = r/(res - 1);
-               let thisX = bezierPoint(FPC[i - 1].x, FPC[i].x1, FPC[i].x2, FPC[i].x, thisT);
-               let thisY = bezierPoint(FPC[i - 1].y, FPC[i].y1, FPC[i].y2, FPC[i].y, thisT);
+               let thisX = bezierPoint(cmd[i - 1].x, cmd[i].x1, cmd[i].x2, cmd[i].x, thisT);
+               let thisY = bezierPoint(cmd[i - 1].y, cmd[i].y1, cmd[i].y2, cmd[i].y, thisT);
 
                vertex(thisX, thisY, -extru);
                vertex(thisX, thisY, extru);
@@ -308,57 +336,74 @@
 
          for (let j = 0; j < 2; j++) {
             let openContour = false
-            /* if(j == 1){
-               strokeWeight(2);
-               noStroke(0);
-               //noFill();
-               //translate(0, 0, -50);
-            } else {
-               noStroke();
-               fill(255,110,10)
-            } */
-            noStroke();
-            fill(255,110,10)
-
             closePoint = 0
-            for (i = 0; i < FPC.length; i++) {
-               if (FPC[i].type == "M") {
+            
+            noStroke();
+            fill(255, 110, 10)
+
+            for (i = 0; i < cmd.length; i++) {
+               if (cmd[i].type == "M") {
                   if(i > 0){
                      beginContour();
                      openContour = true;
                   } else {
                      beginShape(TESS);
                   }
-                  vertex(FPC[i].x, FPC[i].y);
+                  vertex(cmd[i].x, cmd[i].y);
                }
             
-               if (FPC[i].type == "Z") {
+               if (cmd[i].type == "Z") {
                   if(openContour){
                      endContour();
                   }
-                  if(i == FPC.length - 1){
+                  if(i == cmd.length - 1){
                      endShape(CLOSE);
                   }
                   closePoint = i + 1;
                }
             
-               if (FPC[i].type == "L") {
-                  vertex(FPC[i].x, FPC[i].y);
+               if (cmd[i].type == "L") {
+                  vertex(cmd[i].x, cmd[i].y);
                }
       
-               if (FPC[i].type == "Q") {
-                  quadraticVertex(FPC[i].x1, FPC[i].y1, FPC[i].x, FPC[i].y);
+               if (cmd[i].type == "Q") {
+                  quadraticVertex(cmd[i].x1, cmd[i].y1, cmd[i].x, cmd[i].y);
                }
       
-               if (FPC[i].type == "C") {
-                  bezierVertex(FPC[i].x1, FPC[i].y1, FPC[i].x2, FPC[i].y2, FPC[i].x, FPC[i].y);
-                  vertex(FPC[i].x, FPC[i].y);
+               if (cmd[i].type == "C") {
+                  bezierVertex(cmd[i].x1, cmd[i].y1, cmd[i].x2, cmd[i].y2, cmd[i].x, cmd[i].y);
+                  vertex(cmd[i].x, cmd[i].y);
                }
             }
          }
       }
+   }
+
+   function draw() {
+      background(255, 190, 100)     
       angle++
 
+      //orbitControl()
+      
+
+      FPCLetters.forEach((letter, idx) => {
+         push()
+         translate(letter.center.x, letter.center.y, 0)
+         if (selectedAnimation === 'Wave') {
+            let rx = sin(angle + idx*10)*15
+            let ry = sin(angle + idx*15)*15
+            let rz = sin(angle + idx*5)*15
+            rotateX(rx)
+            rotateY(ry)
+            rotateZ(rz)
+         }
+         translate(-letter.center.x, -letter.center.y, 0)
+
+         drawLetter(letter)
+         pop()
+      })
+
+      //noLoop()
    }
 
    function windowResized() {

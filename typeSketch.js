@@ -1,42 +1,53 @@
    let canvas
    let starterText = "I'm\nafraid"
 
+   let screen = document.querySelector('#preview')
+   let textContainer = document.querySelector('#preview #container')
+   let textElement = document.querySelector('#preview #text')
+   
+   let colorSet2 = ["f94144","f3722c","f8961e","f9844a","f9c74f","90be6d","43aa8b","4d908e","577590","277da1"]
+   let colorSet = ["f94144", "90be6d", "43aa8b", "4d908e", "577590", "277da1"]
+   let cols = [] 
+   
+   let userInput = document.querySelector('#text-input textarea')
+   let msgContent = userInput.value
+   
    let fonts = []
    let font
    let fontsBytes = []
    let openTypeFonts = []
    let OpenTypeFont
-
    let fontTypes = document.querySelectorAll('.select .options input')
    let selectedType
-   
-   let colorSet2 = ["f94144","f3722c","f8961e","f9844a","f9c74f","90be6d","43aa8b","4d908e","577590","277da1"]
-   let colorSet = ["f94144", "90be6d", "43aa8b", "4d908e", "577590", "277da1"]
-   let cols = []
-   
-   let textElement = document.querySelector('#preview #text')
-   let textContainer = document.querySelector('#preview #container')
-   let screen = document.querySelector('#preview')
-   let userInput = document.querySelector('#text-input textarea')
-   let msgContent = userInput.value
-   let containerWidth = document.querySelector('#font-size input')
 
+   /* REGULATORS */
+   let containerWidth = document.querySelector('#font-size input')
    let currentFontSize
 
-   let angle = 0
+   let depthRegulator = document.querySelector('#depth input')
+   let extrusionDepth = depthRegulator.value
+
+   let tumbleSlider = document.querySelector('#tumble')
+   let tumbleRegulator = document.querySelector('#tumble input')
+   let tumbleStrength = tumbleRegulator.value
+   let tumbleRotations = []
 
    let alignTabs = document.querySelectorAll('#text-align .radios .radio input')
    let alignOptions = ['left', 'center', 'right', 'justify']
    let selectedAlign 
 
-   let depthRegulator = document.querySelector('#depth input')
+   let animationTabs = document.querySelectorAll('#ZoomWaveTumblePunch .radios .radio input')
+   let animationOptions = ['Zoom', 'Wave', 'Tumble', 'Punch']
+   let selectedAnimation
+
+   let punchOffsets = []
+   
+   let angle = 0
 
    let FPC
    let FPCLetters = []
 
-   let animationTabs = document.querySelectorAll('#ZoomWaveTumblePunch .radios .radio input')
-   let animationOptions = ['Zoom', 'Wave', 'Tumble', 'Punch']
-   let selectedAnimation
+
 
    function preload() {
       const fontPaths = [
@@ -60,6 +71,9 @@
       angleMode(DEGREES)
       
       userInput.value = starterText
+      xRot = random(-PI/8, PI/8)
+      yRot = random(-PI/6, PI/6)
+      zRot = random(-PI/6, PI/6)
 
       for(let i = 0; i < fontsBytes.length; i++) {
          openTypeFonts[i] = opentype.parse(fontsBytes[i].bytes.buffer)
@@ -95,6 +109,16 @@
          animationTabs[i].addEventListener('change', function(event) {
             if(event.target.checked) {
                selectedAnimation = animationOptions[i]
+
+               if(selectedAnimation === 'Tumble') {
+                  depthRegulator.value = 20
+                  extrusionDepth = depthRegulator.value
+                  tumbleSlider.classList.add('shown')
+                  tumbleSlider.classList.remove('hidden')
+               } else {
+                  tumbleSlider.classList.add('hidden')
+                  tumbleSlider.classList.remove('shown')
+               }
             }
             updateContainerWidth()
          })
@@ -148,7 +172,8 @@
       userInput.addEventListener('input', updateFontSize)
       window.addEventListener('resize', updateFontSize)
       containerWidth.addEventListener('input', updateContainerWidth)
-      depthRegulator.addEventListener('input', function(event) {maxExtrusion = event.target.value})
+      depthRegulator.addEventListener('input', function(event) {extrusionDepth = event.target.value})
+      tumbleRegulator.addEventListener('input', function(event) {tumbleStrength = event.target.value})
 
       function updateTextLayout() {  
          let letters = []
@@ -248,10 +273,35 @@
          cols[i] = round(random(colorSet.length - 1))
       }
    }
+
+   function Tumble() {
+      tumbleRotations = []
+      for (let i = 0; i < FPCLetters.length; i++) {
+         tumbleRotations.push({
+            rx: random(-PI/8, PI/8),
+            ry: random(-PI/6, PI/6),
+            rz: random(-PI/6, PI/6)
+         })
+      }
+   }
+
+   function Punch() {
+      punchOffsets = []
+      for (let i = 0; i < FPCLetters.length; i++) {
+         punchOffsets.push({
+            dx: random(-30, 30),
+            dy: random(-30, 30),
+            dz: random(-50, 50),
+            rx: random(-PI / 8, PI / 8),
+            ry: random(-PI / 8, PI / 8),
+            rz: random(-PI / 8, PI / 8)
+         })
+      }
+   }
    
 
    let period = 180
-   let maxExtrusion = 100
+   
    function easeInOutQuint (t, b, c, d) {
     if ((t /= d / 2) < 1) return c / 2 * t * t * t * t * t + b;
     return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
@@ -264,12 +314,12 @@
       let t = angle % period     // t от 0 до 1
       let progress = (t / period) * 2
       if (progress > 1) progress = 2 - progress // Reversing phase
-      let extru = easeInOutQuint(progress, 0, maxExtrusion, 1) 
+      let extru = easeInOutQuint(progress, 0, extrusionDepth, 1) 
       if (progress === 0) {
          generateColors()
       } 
-      let cmd = letter.commands
 
+      let cmd = letter.commands
       for (let i = 0; i < letter.commands.length; i++) {
          
          fill(`#${colorSet[cols[i]]}`)
@@ -383,9 +433,12 @@
       background(255, 190, 100)     
       angle++
 
-      //orbitControl()
-      
+      let t = angle % period
+      let progress = (t / period) * 2
+      if (progress > 1) progress = 2 - progress
+      let tumblePhase = easeInOutQuint(progress, 0, tumbleStrength, 1)
 
+      
       FPCLetters.forEach((letter, idx) => {
          push()
          translate(letter.center.x, letter.center.y, 0)
@@ -396,14 +449,61 @@
             rotateX(rx)
             rotateY(ry)
             rotateZ(rz)
+         } /* else if (selectedAnimation === 'Tumble') {
+            let t = angle % period     // t от 0 до 1
+            let progress = (t / period) * 2
+            if (progress > 1) progress = 2 - progress // Reversing phase
+            let idx = easeInOutQuint(progress, 0, extrusionDepth, 1)
+
+           
+
+            let rx = sin(idx*xRot*100)
+            let ry = sin(idx*yRot*100)
+            let rz = sin(idx*zRot*100)
+            rotateX(rx)
+            rotateY(ry)
+            rotateZ(rz)
+
+            xRot = random(-PI/8, PI/8)
+            yRot = random(-PI/6, PI/6)
+            zRot = random(-PI/6, PI/6)
+         }  */else if (selectedAnimation === 'Tumble') {
+            if (progress === 0) {Tumble()}
+
+            let rot = tumbleRotations[idx] || { rx: 0, ry: 0, rz: 0 }
+
+            let rx = rot.rx * tumblePhase
+            let ry = rot.ry * tumblePhase
+            let rz = rot.rz * tumblePhase
+
+            rotateX(rx)
+            rotateY(ry)
+            rotateZ(rz)
+         } else if (selectedAnimation === 'Punch') {
+            if (progress === 0) {Punch()}
+
+            let p = punchOffsets[idx] || { dx: 0, dy: 0, dz: 0, rx: 0, ry: 0, rz: 0 }
+
+            let shiftX = p.dx * tumblePhase
+            let shiftY = p.dy * tumblePhase
+            let shiftZ = p.dz * tumblePhase
+
+            let rotX = p.rx * tumblePhase
+            let rotY = p.ry * tumblePhase
+            let rotZ = p.rz * tumblePhase
+
+            translate(shiftX, shiftY, shiftZ)
+            rotateX(rotX)
+            rotateY(rotY)
+            rotateZ(rotZ)
          }
+
          translate(-letter.center.x, -letter.center.y, 0)
 
          drawLetter(letter)
          pop()
       })
 
-      //noLoop()
    }
 
    function windowResized() {

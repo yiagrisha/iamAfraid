@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 30">
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 50 30">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: none;
+      }
+    </style>
+    <clipPath id="clippath">
+      <ellipse class="cls-1" cx="87.78" cy="59" rx="20.6" ry="13.52"/>
+    </clipPath>
+  </defs>
   <rect x="11.22" y="3.22" width="28.11" height="3.67"/>
   <rect x="15.22" y="9.85" width="24.11" height="3.67"/>
   <rect x="10.67" y="16.48" width="28.67" height="3.67"/>

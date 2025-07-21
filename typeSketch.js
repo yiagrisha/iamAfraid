@@ -17,7 +17,7 @@
    let fontsBytes = []
    let openTypeFonts = []
    let OpenTypeFont
-   let fontTypes = document.querySelectorAll('.select .options input')
+   let fontTypes = document.querySelectorAll('#font-choose .options input')
    let selectedType
 
    /* REGULATORS */
@@ -34,7 +34,7 @@
 
    let alignTabs = document.querySelectorAll('#text-align .radios .radio input')
    let alignOptions = ['left', 'center', 'right', 'justify']
-   let selectedAlign 
+   let selectedAlign = alignOptions[1]
 
    let animationTabs = document.querySelectorAll('#ZoomWaveTumblePunch .radios .radio input')
    let animationOptions = ['Zoom', 'Wave', 'Tumble', 'Punch']
@@ -44,10 +44,9 @@
    
    let angle = 0
 
-   let FPC
    let FPCLetters = []
-
-
+   let textCenter = { x: 0, y: 0 }
+   let period = 180
 
    function preload() {
       const fontPaths = [
@@ -110,14 +109,25 @@
             if(event.target.checked) {
                selectedAnimation = animationOptions[i]
 
-               if(selectedAnimation === 'Tumble') {
+               if(selectedAnimation === 'Zoom') {
+                  depthRegulator.value = 200
+                  extrusionDepth = depthRegulator.value
+                  tumbleSlider.classList.add('hidden')
+
+               } else if(selectedAnimation === 'Wave') {
                   depthRegulator.value = 20
                   extrusionDepth = depthRegulator.value
-                  tumbleSlider.classList.add('shown')
-                  tumbleSlider.classList.remove('hidden')
-               } else {
                   tumbleSlider.classList.add('hidden')
-                  tumbleSlider.classList.remove('shown')
+
+               } else if(selectedAnimation === 'Tumble') {
+                  depthRegulator.value = 20
+                  extrusionDepth = depthRegulator.value
+                  tumbleSlider.classList.remove('hidden')
+
+               } else if(selectedAnimation === 'Punch') {
+                  tumbleSlider.classList.add('hidden')
+                  depthRegulator.value = 20
+                  extrusionDepth = depthRegulator.value
                }
             }
             updateContainerWidth()
@@ -169,7 +179,12 @@
          }
       }
       
-      userInput.addEventListener('input', updateFontSize)
+      userInput.addEventListener('input', function() {
+         updateFontSize()
+         Tumble()
+         Punch()
+         angle = 0
+      })
       window.addEventListener('resize', updateFontSize)
       containerWidth.addEventListener('input', updateContainerWidth)
       depthRegulator.addEventListener('input', function(event) {extrusionDepth = event.target.value})
@@ -187,6 +202,10 @@
          let containerOffsetWidth = 0
          let containerOffsetHeight = lines.length * lineHeight
          let baselineShift = lineHeight/5
+
+         let totalX = 0
+         let totalY = 0
+         let count = 0
 
          for(let i = 0; i < lines.length; i++) {
             let lineWidth = font.getAdvanceWidth(lines[i], currentFontSize)
@@ -246,11 +265,20 @@
                   letters.push({ commands: shifted, center })
 
                   charOffsetX += charWidth
+
+                  totalX += center.x
+                  totalY += center.y
+                  count++
                }
 
                if(j < words.length - 1) {
                   charOffsetX += extraSpace + font.getAdvanceWidth(' ', currentFontSize)
                }
+            }
+
+            textCenter = {
+               x: totalX / count,
+               y: totalY / count
             }
          }
          return letters
@@ -258,6 +286,8 @@
       FPCLetters = updateTextLayout() 
 
       generateColors()
+      Tumble()
+      Punch()
    }
    
    function quadLerp(a, b, c, t) {
@@ -276,6 +306,7 @@
 
    function Tumble() {
       tumbleRotations = []
+
       for (let i = 0; i < FPCLetters.length; i++) {
          tumbleRotations.push({
             rx: random(-PI/8, PI/8),
@@ -287,24 +318,47 @@
 
    function Punch() {
       punchOffsets = []
+
       for (let i = 0; i < FPCLetters.length; i++) {
+         let letter = FPCLetters[i]
+         let dx = letter.center.x - textCenter.x
+         let dy = letter.center.y - textCenter.y
+
+         let angle = atan2(dy, dx)
+         let dist = sqrt(dx * dx + dy * dy)
+         let power = map(dist, 0, 300, 0, 5)
+
+         let offsetX = cos(angle) * power
+         let offsetY = sin(angle) * power
+
+         let rotZ = map(power, 0.1, 6, 0, -PI/2) * 3 
+         let rotY = map(power, 0.1, 6, 0, -PI/2) * (angle/5)
+         let rotX = map(power, 0.1, 6, 0, -PI/2) * 3
+         if(random(1) < 0.3) {
+            rotY += random(PI, PI * 2)
+         }
+
          punchOffsets.push({
-            dx: random(-30, 30),
-            dy: random(-30, 30),
-            dz: random(-50, 50),
-            rx: random(-PI / 8, PI / 8),
-            ry: random(-PI / 8, PI / 8),
-            rz: random(-PI / 8, PI / 8)
+            dx: offsetX,
+            dy: offsetY,
+            dz: 0,
+            rx: rotX,
+            ry: rotY,
+            rz: rotZ
          })
       }
    }
-   
 
-   let period = 180
+   
    
    function easeInOutQuint (t, b, c, d) {
     if ((t /= d / 2) < 1) return c / 2 * t * t * t * t * t + b;
     return c / 2 * ((t -= 2) * t * t * t * t + 2) + b;
+   }
+   function easeOutCubic(t, b, c, d) {
+      t /= d;
+      t--;
+      return c * (t * t * t + 1) + b;
    }
 
    function drawLetter(letter) {
@@ -315,10 +369,11 @@
       let progress = (t / period) * 2
       if (progress > 1) progress = 2 - progress // Reversing phase
       let extru = easeInOutQuint(progress, 0, extrusionDepth, 1) 
-      if (progress === 0) {
+
+      /* if (progress === 0) {
          generateColors()
       } 
-
+ */
       let cmd = letter.commands
       for (let i = 0; i < letter.commands.length; i++) {
          
@@ -377,12 +432,12 @@
          } 
       }
 
-
       for (let m = 0; m < 2; m++) {
-         translate(0, 0, m * extru)
-         noStroke(0)
-
-         if (m == 0) continue
+         if(m === 0) {
+            translate(0, 0, -extru)
+         } else{
+            translate(0, 0, extru*2)
+         }
 
          for (let j = 0; j < 2; j++) {
             let openContour = false
@@ -434,10 +489,29 @@
       angle++
 
       let t = angle % period
-      let progress = (t / period) * 2
-      if (progress > 1) progress = 2 - progress
-      let tumblePhase = easeInOutQuint(progress, 0, tumbleStrength, 1)
+      let pauseRatio = 0.2
+      let activeDuration = period * (1 - pauseRatio)
+      let progress = 0
 
+      let tumblePhase
+      let punchPhase
+
+      if(t < activeDuration) {
+         progress = (t /activeDuration) * 2
+
+         if(progress > 1) progress = 2 - progress
+
+         tumblePhase = easeInOutQuint(progress, 0, tumbleStrength, 1)
+         punchPhase = easeOutCubic(progress, 0, tumbleStrength, 1)
+      } else {
+         tumblePhase = 0
+         punchPhase = 0
+      }
+      
+      if (progress === 0) {
+         Tumble()
+         Punch()
+      }
       
       FPCLetters.forEach((letter, idx) => {
          push()
@@ -449,27 +523,7 @@
             rotateX(rx)
             rotateY(ry)
             rotateZ(rz)
-         } /* else if (selectedAnimation === 'Tumble') {
-            let t = angle % period     // t от 0 до 1
-            let progress = (t / period) * 2
-            if (progress > 1) progress = 2 - progress // Reversing phase
-            let idx = easeInOutQuint(progress, 0, extrusionDepth, 1)
-
-           
-
-            let rx = sin(idx*xRot*100)
-            let ry = sin(idx*yRot*100)
-            let rz = sin(idx*zRot*100)
-            rotateX(rx)
-            rotateY(ry)
-            rotateZ(rz)
-
-            xRot = random(-PI/8, PI/8)
-            yRot = random(-PI/6, PI/6)
-            zRot = random(-PI/6, PI/6)
-         }  */else if (selectedAnimation === 'Tumble') {
-            if (progress === 0) {Tumble()}
-
+         } else if (selectedAnimation === 'Tumble') {
             let rot = tumbleRotations[idx] || { rx: 0, ry: 0, rz: 0 }
 
             let rx = rot.rx * tumblePhase
@@ -480,19 +534,17 @@
             rotateY(ry)
             rotateZ(rz)
          } else if (selectedAnimation === 'Punch') {
-            if (progress === 0) {Punch()}
-
             let p = punchOffsets[idx] || { dx: 0, dy: 0, dz: 0, rx: 0, ry: 0, rz: 0 }
 
-            let shiftX = p.dx * tumblePhase
-            let shiftY = p.dy * tumblePhase
-            let shiftZ = p.dz * tumblePhase
+            let shiftX = p.dx * punchPhase
+            let shiftY = p.dy * punchPhase
+            let shiftZ = p.dz * punchPhase
 
-            let rotX = p.rx * tumblePhase
-            let rotY = p.ry * tumblePhase
-            let rotZ = p.rz * tumblePhase
+            let rotX = p.rx * punchPhase
+            let rotY = p.ry * punchPhase
+            let rotZ = p.rz * punchPhase
 
-            translate(shiftX, shiftY, shiftZ)
+            translate(shiftX, shiftY)
             rotateX(rotX)
             rotateY(rotY)
             rotateZ(rotZ)

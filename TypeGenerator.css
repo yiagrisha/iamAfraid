@@ -67,28 +67,187 @@ body {
    height: 100vh;
 }
 
-#tools {
+#controls {
+   font-size: 16px;
+
    position: absolute;
    top: 0;
    left: 0;
    z-index: 10;
-
+   
    display: flex;
    flex-direction: column;
-   gap: 25px;
+   gap: 0.3em;
+}
 
+#canvas-switch {
    background-color: rgb(0, 0, 0);
    border-right: 1px solid white;
    border-bottom: 1px solid white;
-   border-radius: 0 0 5px 0;
-   width: 200px;
+   border-radius: 0 0 0.3em 0;
+   width: 10em;
    
-   padding: 10px 10px 20px 10px;
+   padding: 0.6em;
 
    aside {
       display: flex;
       flex-direction: column;
       gap: 5px;
+   }
+
+   .select {
+      width: 100%;
+      height: 2.7em;
+
+      cursor: pointer;
+      position: relative;
+      transition: 0.3s;
+
+      color: rgb(0, 0, 0);
+      
+      .selected {
+         background-color: #ffffff;
+      
+         padding: 0.3em 0.2em 0.3em 0.7em;
+         margin-bottom: 0.1em;
+         border-radius: 0.3em;
+         
+         z-index: 1000000;
+         font-size: 1em;
+      
+         position: relative;
+         display: flex;
+         align-items: center;
+         justify-content: space-between;
+      
+         .arrow {
+            position: relative;
+            right: 0;
+      
+            height: 1em;
+            width: 1.5em;
+      
+            fill: rgb(0, 0, 0);
+            z-index: 1000;
+      
+            transform: rotate(-90deg);
+            transition: 0.3s;
+         }
+         }
+      
+         .canvas-options {
+         display: flex;
+         flex-direction: column;
+         
+         border-radius: 0.3em;
+         padding: 0.3em;
+         
+         background-color: #fad818;
+         position: relative;
+         
+         opacity: 0;
+         transition: opacity 0 ease;
+         
+         top: -150px;
+         left: -1000px;
+         z-index: 1000000;
+         }
+      
+      }
+
+
+
+
+      .select:hover > .canvas-options {
+      opacity: 1;
+      top: 0;
+      left: 0;
+      transition: opacity 0.5s ease;
+      }
+
+      .select:hover > .selected .arrow {
+      transform: rotate(0deg);
+      }
+
+      .option {
+         font-size: 0.8em;
+
+         border-radius: 0.4em;
+         padding: 0.2em 0 0.2em 0.6em;
+         transition: 0.3s;
+
+         background-color: #ffffff;
+
+         width: 100%;
+      }
+      .option:hover {
+      background-color: rgb(173, 173, 173);
+      }
+
+      .canvas-options input[type="radio"] {
+      display: none;
+      }
+
+      .canvas-options label {
+      display: inline-block;
+      }
+      .canvas-options label::before {
+      content: attr(data-txt);
+      }
+
+      .canvas-options input[type="radio"]:checked + label {
+      display: none;
+      }
+
+      .canvas-options input[type="radio"]#all:checked + label {
+      display: none;
+      }
+
+      .select:has(.canvas-options input[type="radio"]#all:checked) .selected::before {
+      content: attr(data-default);
+      }
+      .select:has(.canvas-options input[type="radio"]#canvas-option-1:checked) .selected::before {
+      content: attr(data-one);
+      }
+      .select:has(.canvas-options input[type="radio"]#canvas-option-2:checked) .selected::before {
+      content: attr(data-two);
+      }
+      
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#tools {
+   display: flex;
+   flex-direction: column;
+   gap: 1.5em;
+
+   background-color: rgb(0, 0, 0);
+   border-top: 1px solid white;;
+   border-right: 1px solid white;
+   border-bottom: 1px solid white;
+   border-radius: 0 0.3em 0.3em 0;
+   width: 10em;
+   
+   padding: 0.6em 0.6em 1.2em 0.6em;
+
+   aside {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3em;
    }
 }
 
@@ -100,19 +259,19 @@ body {
 
    textarea {
       border: none;
-      border-radius: 5px;
+      border-radius: 0.3em;
       white-space: pre;
       
       width: 100%;
       max-width: 100%;
-      height: 100px;
-      min-height: 80px;
+      height: 5em;
+      min-height: 3em;
       
       font-family: inherit;
-      font-size: 16px;
+      font-size: 1em;
       box-sizing: border-box;
       
-      padding: 7px 10px ;
+      padding: 0.6em 0.7em ;
    } 
 }
 
@@ -122,15 +281,15 @@ body {
    display: flex;
    align-items: baseline;
    justify-content: space-between;
-   gap: 5px;
+   gap: 0.3em;
 
    padding: 0;
    
    span {
-      font-size: 14px;
+      font-size: 0.9em;
       align-content: left;
       text-align: end;
-      width: 90px;
+      width: 7em;
 
       color: #ffffff;
    }
@@ -146,7 +305,7 @@ body {
       cursor: pointer;
       width: 100%;
 
-      padding-bottom: 3px;
+      padding-bottom: 0.2em;
    }
    
    /* Removes default focus */
@@ -170,8 +329,8 @@ body {
       /*custom styles*/
       background-color: white;
       border: 2px solid black;
-      height: 16px;
-      width: 16px;
+      height: 1.2em;
+      width: 1.2em;
       border-radius: 50%;
       
       transform: translateY(-43%)
@@ -186,7 +345,7 @@ body {
 
 .select {
   width: 100%;
-  height: 30px;
+  height: 2em;
 
   cursor: pointer;
   position: relative;
@@ -197,12 +356,12 @@ body {
   .selected {
     background-color: #ffffff;
   
-    padding: 4px 3px 4px 10px;
-    margin-bottom: 2px;
-    border-radius: 5px;
+    padding: 0.3em 0.2em 0.3em 0.7em;
+    margin-bottom: 0.2em;
+    border-radius: 0.3em;
     
     z-index: 100000;
-    font-size: 16px;
+    font-size: 1em;
   
     position: relative;
     display: flex;
@@ -211,10 +370,10 @@ body {
   
     .arrow {
       position: relative;
-      right: 0px;
+      right: 0;
   
-      height: 20px;
-      width: 25px;
+      height: 1em;
+      width: 1.5em;
   
       fill: rgb(0, 0, 0);
       z-index: 1000;
@@ -228,8 +387,8 @@ body {
      display: flex;
      flex-direction: column;
    
-     border-radius: 5px;
-     padding: 5px;
+     border-radius: 0.3em;
+     padding: 0.3em;
    
      background-color: #ffffff;
      position: relative;
@@ -238,6 +397,7 @@ body {
      transition: opacity 0 ease;
    
      top: -150px;
+     left: -1000px;
      z-index: 100000;
    }
   
@@ -249,6 +409,7 @@ body {
 .select:hover > .options {
   opacity: 1;
   top: 0;
+  left: 0;
   transition: opacity 0.5s ease;
 }
 
@@ -257,14 +418,15 @@ body {
 }
 
 .option {
-  border-radius: 2px;
-  padding: 3px 0 3px 6px;
-  transition: 0.3s;
+   font-size: 0.8em;
 
-  background-color: #ffffff;
+   border-radius: 0.4em;
+   padding: 0.2em 0 0.2em 0.6em;
+   transition: 0.3s;
 
-  width: 100%;
-  font-size: 17px;
+   background-color: #ffffff;
+
+   width: 100%;
 }
 .option:hover {
   background-color: rgb(173, 173, 173);
@@ -310,15 +472,14 @@ body {
 
 
 .choosing {
-   display: flex;
-   flex-direction: column;
    width: 100%;
 
    .radios {
       display: flex; 
+      flex-wrap: wrap;
       
       .radio {
-         width: 30%;
+         width: 25%;
          display: flex;
          flex: 1 1 auto;
          align-items: center;
@@ -339,6 +500,50 @@ body {
             &:checked + svg {
                fill: rgb(255, 255, 255);
             }
+         }
+      }
+   }
+}
+
+#ZoomWaveTumblePunch {
+   width: 100%;
+   
+   .radios {
+      display: flex; 
+      flex-wrap: wrap;
+      gap: 6%;
+      row-gap: 0.4em;
+      
+      .radio {
+         width: 47%;
+         display: flex;
+         flex: 1 1 auto;
+         align-items: center;
+         justify-content: center;
+         
+         cursor: pointer;
+
+         
+         border-radius: 0.4em;
+         padding: 0.3em 0.7em;
+         
+         svg {
+            width: 100%;
+            
+            fill: rgb(173, 173, 173);
+            transition: all .15s ease;
+         }
+         
+         input {
+            display: none;
+            
+            &:checked + svg {
+               fill: rgb(0, 0, 0);
+            }
+         }
+
+         &:has(input:checked) {
+            background-color: white;
          }
       }
    }

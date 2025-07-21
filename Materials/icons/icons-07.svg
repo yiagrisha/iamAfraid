@@ -1,10 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 30">
-  <rect x="10.94" y="3.22" width="28.11" height="3.67"/>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 50 30">
+  <defs>
+    <style>
+      .cls-1 {
+        isolation: isolate;
+      }
+
+      .cls-2 {
+        clip-path: url(#clippath);
+      }
+
+      .cls-3 {
+        fill: none;
+      }
+    </style>
+    <clipPath id="clippath">
+      <ellipse class="cls-3" cx="25" cy="59" rx="20.6" ry="13.52"/>
+    </clipPath>
+  </defs>
   <g>
-    <rect x="10.94" y="9.85" width="14.06" height="3.67"/>
-    <rect x="32.41" y="9.85" width="6.64" height="3.67"/>
+    <rect x="10.94" y="3.22" width="28.11" height="3.67"/>
+    <g>
+      <rect x="10.94" y="9.85" width="14.06" height="3.67"/>
+      <rect x="32.41" y="9.85" width="6.64" height="3.67"/>
+    </g>
+    <rect x="12.68" y="16.48" width="24.64" height="3.67"/>
+    <rect x="10.94" y="23.12" width="28.11" height="3.67"/>
   </g>
-  <rect x="12.68" y="16.48" width="24.64" height="3.67"/>
-  <rect x="10.94" y="23.12" width="28.11" height="3.67"/>
+  <g class="cls-2">
+    <g class="cls-1">
+      <polygon points="31.86 17.66 32.12 17.73 25.69 50.02 25.47 49.69 31.86 17.66"/>
+      <polygon points="23.91 11.7 24.17 11.73 24.01 47.54 23.73 47.57 23.91 11.7"/>
+      <polygon points="39.72 23.54 39.95 23.66 27 52.08 26.82 51.8 39.72 23.54"/>
+      <polygon points="47.49 29.34 47.69 29.52 28.05 53.74 27.89 53.48 47.49 29.34"/>
+      <polygon points="16.12 5.65 22.33 47.72 22.05 47.75 15.85 5.66 16.12 5.65"/>
+      <polygon points="9.75 12.24 20.65 47.89 20.37 47.92 9.49 12.3 9.75 12.24"/>
+      <polygon points="3.12 19.1 19.55 50.33 19.44 50.71 2.87 19.2 3.12 19.1"/>
+      <polygon points="-3.79 26.23 18.84 52.7 18.75 53.02 -4.02 26.39 -3.79 26.23"/>
+    </g>
+  </g>
 </svg>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <title>TypeGenerator</title>
+   <meta charset="UTF-8">
+   <link rel="stylesheet" href="typeGenerator.css">
+   <script src="https://cdn.rawgit.com/nodebox/g.js/master/dist/g.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
+</head>
+<body> 
+  <section id="preview">
+   <div id="container">
+      <div id="text">gdb</div>
+   </div>
+  </section>
+   
+  <section id="canvas">
+
+  </section>
+
+  <section id="tools">
+   <aside>
+      <div id="text-input">
+         <textarea type="text"></textarea>
+      </div>
+   
+      <div class="select">
+         <div class="selected" data-default="Montserrat" data-one="Montserrat"  data-two="Amarante" data-three="Press_Start_2P" data-four="NotoSans" data-five="Faculty_Glyphic">
+            <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512" class="arrow">
+               <path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"></path>
+            </svg>
+         </div>
+   
+         <div class="options">
+            <div title="option-1">
+               <input id="option-1" name="option" type="radio" checked=""/>
+               <label class="option" for="option-1" data-txt="Montserrat" ></label>
+            </div>
+            <div title="option-2">
+               <input id="option-2" name="option" type="radio" />
+               <label class="option" for="option-2" data-txt="Amarante"></label>
+            </div>
+            <div title="option-3">
+               <input id="option-3" name="option" type="radio" />
+               <label class="option" for="option-3" data-txt="Press_Start_2P"></label>
+            </div>
+            <div title="option-4">
+               <input id="option-4" name="option" type="radio" />
+               <label class="option" for="option-4" data-txt="NotoSans"></label>
+            </div>
+            <div title="option-5">
+               <input id="option-5" name="option" type="radio" />
+               <label class="option" for="option-5" data-txt="Faculty_Glyphic"></label>
+            </div>
+         </div>
+      </div>
+   </aside>
+</body>
+</html>

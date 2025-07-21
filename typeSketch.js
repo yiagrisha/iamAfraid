@@ -51,7 +51,7 @@
    function preload() {
       const fontPaths = [
          'Materials/Montserrat-Regular.ttf',
-         'Materials/Amarante/Amarante-regular.ttf',
+         'Materials/Amarante/Amarante-Regular.ttf',
          'Materials/Press_Start_2P/PressStart2P-Regular.ttf',
          'Materials/NotoSansJP-VariableFont_wght.ttf',
          'Materials/Faculty_Glyphic/FacultyGlyphic-Regular.ttf'

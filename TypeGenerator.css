@@ -83,7 +83,8 @@ body {
 
 
    @media screen and (max-width: 768px) {
-    width: 40%;
+    
+      width: 40%;
    }   
 }
 
@@ -234,7 +235,9 @@ body {
    border-radius: 0 0 0.3em 0;
    width: 10em;
    
-   padding: 0.6em;
+   
+
+   padding: 0.5em;
 
    aside {
       display: flex;

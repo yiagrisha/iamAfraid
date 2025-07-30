@@ -83,7 +83,7 @@ body {
 
 
    @media screen and (max-width: 768px) {
-    width: 100%;
+    width: 80%;
    }   
 }
 
@@ -260,11 +260,7 @@ body {
     width: 100%;
 
     border-top: 1px solid white;;
-    border-right: none;
     border-bottom: none;
-    border-radius: 0.3em 0.3em 0 0;
-
-    gap: 2em;
    }
 }
 
@@ -289,6 +285,10 @@ body {
       box-sizing: border-box;
       
       padding: 0.6em 0.7em ;
+
+      @media screen and (max-width: 768px) {
+         height: 4em;
+      }
    } 
 }
 
@@ -358,7 +358,7 @@ body {
       gap: 0.5em;
     
       span {
-         font-size: 1.2em;
+         font-size: 0.9em;
          
       }
    }
@@ -531,7 +531,7 @@ body {
       .radios {
          .radio {
             svg {
-               width: 70%;
+               width: 55%;
             }
          }
       }
@@ -561,7 +561,7 @@ body {
          padding: 0.3em 0.7em;
          
          svg {
-            width: 100%;
+            width: 70%;
             
             fill: rgb(173, 173, 173);
             transition: all .15s ease;

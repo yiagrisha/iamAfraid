@@ -517,7 +517,7 @@ body {
       .radios {
          .radio {
             svg {
-               width: 55%;
+               width: 80%;
             }
          }
       }
@@ -547,7 +547,7 @@ body {
          padding: 0.3em 0.7em;
          
          svg {
-            width: 70%;
+            width: 100%;
             
             fill: rgb(173, 173, 173);
             transition: all .15s ease;

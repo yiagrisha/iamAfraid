@@ -73,7 +73,7 @@ body {
    font-size: 16px;
 
    position: absolute;
-   bottom: 0;
+   top: 0;
    left: 0;
    z-index: 10;
    
@@ -243,9 +243,9 @@ body {
    gap: 1.5em;
 
    background-color: rgb(0, 0, 0);
-   border-top: 1px solid white;;
+   border-bottom: 1px solid white;;
    border-right: 1px solid white;
-   border-radius: 0 0.3em 0 0;
+   border-radius: 0  0 0.3em 0;
    width: 10em;
    
    padding: 0.6em 0.6em 1.2em 0.6em;

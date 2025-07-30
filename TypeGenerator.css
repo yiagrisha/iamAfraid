@@ -83,7 +83,7 @@ body {
 
 
    @media screen and (max-width: 768px) {
-    width: 80%;
+    width: 70%;
    }   
 }
 
@@ -223,20 +223,6 @@ body {
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #tools {
    display: flex;
    flex-direction: column;
@@ -258,9 +244,6 @@ body {
 
    @media screen and (max-width: 768px) {
     width: 100%;
-
-    border-top: 1px solid white;;
-    border-bottom: none;
    }
 }
 
